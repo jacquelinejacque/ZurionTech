@@ -7,8 +7,8 @@ export default {
   data() {
     return {
       formData: {
-        username: 'maggie@example.com',
-        password: '12345'
+        username: 'johndoe@example.com',
+        password: 'password123'
       },
       loading: false,
       formSubmitted: false,
