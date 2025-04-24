@@ -29,7 +29,7 @@ export default {
         bInfo: false,
         destroy: true,
         paging: true,
-        searching: true, // ENABLE SEARCH
+        searching: true, 
         ordering: true,
         pageLength: 10,
         ajax: {
@@ -134,7 +134,6 @@ export default {
       const contactId = $(e.currentTarget).data('id');
       this.selectedUserID = contactId;
 
-      // Optional: open modal manually for safety
       setTimeout(() => {
         const modalEl = document.getElementById('deleteContactModal');
         const modalInstance = Modal.getOrCreateInstance(modalEl);
@@ -145,7 +144,6 @@ export default {
     $(document).on('click', '.edit-contact', (e) => {
       e.preventDefault();
       const contactId = $(e.currentTarget).data('id');
-      // You can now find the contact details from DataTable's data
       const rowData = this.$refs.table.dt
         .rows()
         .data()
@@ -227,14 +225,12 @@ export default {
       const modalInstance = Modal.getInstance(modalEl) || new Modal(modalEl);
       modalInstance.hide();
 
-      // Ensure backdrop is cleaned after modal hides
       modalEl.addEventListener('hidden.bs.modal', () => {
         setTimeout(() => {
           document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
           document.body.classList.remove('modal-open');
         }, 300);
 
-        // Refresh the DataTable
         if (this.$refs.table && this.$refs.table.dt) {
           this.$refs.table.dt.ajax.reload(null, false);
         } else {
@@ -327,35 +323,35 @@ export default {
       </div>
     </div>
 
-<!-- Delete Contact Confirmation Modal -->
-<div
-  class="modal fade"
-  id="deleteContactModal"
-  tabindex="-1"
-  aria-labelledby="deleteContactModalLabel"
-  aria-hidden="true"
->
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="deleteContactModalLabel">Confirm Delete</h5>
-        <button
-          type="button"
-          class="btn-close"
-          data-bs-dismiss="modal"
-          aria-label="Close"
-        ></button>
-      </div>
-      <div class="modal-body">
-        Are you sure you want to delete this contact?
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" @click="cancelDelete">No</button>
-        <button type="button" class="btn btn-danger" @click="confirmDelete">Yes</button>
+  <!-- Delete Contact Confirmation Modal -->
+  <div
+    class="modal fade"
+    id="deleteContactModal"
+    tabindex="-1"
+    aria-labelledby="deleteContactModalLabel"
+    aria-hidden="true"
+  >
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="deleteContactModalLabel">Confirm Delete</h5>
+          <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="modal"
+            aria-label="Close"
+          ></button>
+        </div>
+        <div class="modal-body">
+          Are you sure you want to delete this contact?
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" @click="cancelDelete">No</button>
+          <button type="button" class="btn btn-danger" @click="confirmDelete">Yes</button>
+        </div>
       </div>
     </div>
   </div>
-</div>
 
 
   </div>

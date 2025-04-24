@@ -241,11 +241,16 @@ class UserLogic {
                 .catch((err) => done(err));
             },
             function (totalRecords, done) {
+
+              const offset = parseInt(param.start) || 0;
+              const limit = parseInt(param.length) || 10;              
               DatabaseManager.user
                 .findAll({
                   where: query,
                   attributes: ["userID", "name", "phone", "email", "idNumber", "dateOfBirth", "gender", "organisation", "maskedName", "maskedPhone", "hashedPhone"],
                   order: [["createdAt", "DESC"]],
+                  offset: offset,
+                  limit: limit,                  
                 })
                 .then((data) => done(null, totalRecords, data))
                 .catch((err) => done(err));
@@ -267,6 +272,7 @@ class UserLogic {
               status: Consts.httpCodeSuccess,
               message: "User Contacts fetched successfully",
               data: data,
+              draw: parseInt(param.draw), 
               recordsTotal: totalRecords,
               recordsFiltered: totalRecords,
             });
