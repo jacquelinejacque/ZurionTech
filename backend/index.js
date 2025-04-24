@@ -11,7 +11,7 @@ dotenv.config({ path: __dirname + "/.env" });
 const app = express();
 
 var httpServer = createServer(app);
-httpServer.listen(process.env["PORT"]||3000, function () {
+httpServer.listen(process.env["PORT"]||4600, function () {
   console.log("Server listening on port " + process.env["PORT"] + "!");
  
 });

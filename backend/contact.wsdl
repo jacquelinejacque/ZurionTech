@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions name="ContactService"
+             targetNamespace="http://example.com/contacts"
+             xmlns="http://schemas.xmlsoap.org/wsdl/"
+             xmlns:tns="http://example.com/contacts"
+             xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+             xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/">
+
+  <message name="GetContactsByOrganizationRequest">
+    <part name="organization" type="xsd:string"/>
+  </message>
+
+  <message name="GetContactsByOrganizationResponse">
+    <part name="contacts" type="xsd:string"/>
+  </message>
+
+  <portType name="ContactPortType">
+    <operation name="GetContactsByOrganization">
+      <input message="tns:GetContactsByOrganizationRequest"/>
+      <output message="tns:GetContactsByOrganizationResponse"/>
+    </operation>
+  </portType>
+
+  <binding name="ContactBinding" type="tns:ContactPortType">
+    <soap:binding style="rpc" transport="http://schemas.xmlsoap.org/soap/http"/>
+    <operation name="GetContactsByOrganization">
+      <soap:operation soapAction="getContacts"/>
+      <input>
+        <soap:body use="literal" namespace="http://example.com/contacts"/>
+      </input>
+      <output>
+        <soap:body use="literal" namespace="http://example.com/contacts"/>
+      </output>
+    </operation>
+  </binding>
+
+  <service name="ContactService">
+    <port name="ContactPort" binding="tns:ContactBinding">
+      <soap:address location="http://localhost:3001/soap/contactService"/>
+    </port>
+  </service>
+
+</definitions>

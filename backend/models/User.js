@@ -46,6 +46,16 @@ class User {
         values: ['active', 'deleted'],
         defaultValue: 'active'
       },
+      maskedName: {
+        type: DataTypes.STRING,
+      },
+      maskedPhone: {
+        type: DataTypes.STRING,
+      },
+      hashedPhone: {
+        type: DataTypes.STRING,
+      },
+      
     });
   }
 }

@@ -5,17 +5,22 @@ import DataTableBs5 from "datatables.net-bs5";
 import $ from "jquery";
 import Toastify from "toastify-js";
 import NewContactForm from "./NewContactForm.vue";
+import EditContactForm from "./EditContactForm.vue";
 import { Const } from "../../utils/constants";
-
+import { Modal } from 'bootstrap'
+import 'bootstrap/dist/js/bootstrap.bundle.min.js'
 DataTable.use(DataTableBs5);
 
 export default {
   components: {
     DataTable,
     NewContactForm,
+    EditContactForm,
   },
   data() {
     return {
+      selectedUserID: null,
+      selectedContact: {},
       options: {
         responsive: true,
         serverSide: true,
@@ -24,25 +29,25 @@ export default {
         bInfo: false,
         destroy: true,
         paging: true,
-        searching: false,
+        searching: true, // ENABLE SEARCH
         ordering: true,
         pageLength: 10,
         ajax: {
-          url: `${Const.BASE_URL}stock/list`,
+          url: `${Const.BASE_URL}users/list`,
           type: "get",
           headers: {
             "access-token": localStorage.getItem("accessToken"),
           },
           dataSrc: (response) => {
             if (response.status === 200) {
-              return response.data; // Map the 'data' key to the table rows
+              return response.data;
             } else {
               Toastify({
                 text: response.message || "Error retrieving stock data.",
                 duration: 3000,
                 backgroundColor: "#d9534f",
               }).showToast();
-              return []; // Return an empty array if there's an error
+              return [];
             }
           },
           error: function () {
@@ -54,67 +59,116 @@ export default {
             }).showToast();
           },
         },
-
       },
+
       columns: [
         {
           title: 'Name',
           data: null,
           render: (data, type, row) => {
-            return `${row.itemName}`
+            return `${row.name}`
           }
         },
         {
-          title: 'Category',
+          title: 'Phone',
           data: null,
           render: (data, type, row) => {
-            return `${row.CategoryName}`
+            return `${row.phone}`
           }
         },
         {
-          title: 'Description',
+          title: 'Email',
           data: null,
           render: (data, type, row) => {
-            return `${row.description}`
+            return `${row.email}`
           }
         },
         {
-          title: 'Quantity',
+          title: 'ID Number',
           data: null,
           render: (data, type, row) => {
-            return `${row.quantity}`
+            return `${row.idNumber}`
           }
         },
         {
-          title: 'Price',
+          title: 'DateOfBirth',
           data: null,
           render: (data, type, row) => {
-            return `${row.price}`
+            return `${row.dateOfBirth}`
           }
         },
         {
-          title: 'Status',
+          title: 'Gender',
           data: null,
           render: (data, type, row) => {
-            return `${row.status}`
+            return `${row.gender}`
           }
         },
+        {
+          title: 'Organisation',
+          data: null,
+          render: (data, type, row) => {
+            return `${row.organisation}`
+          }
+        },        
         {
           title: "Action",
           data: null,
           render: (data, type, row) => {
             return `
               <div class="button-container">
-                <a href="#" class="text-info" data-bs-toggle="modal" data-bs-target="#editStockModal" onclick="editStock('${row.id}')">Edit</a>
-                <a href="#" class="text-danger" onclick="deleteStock('${row.id}')">Delete</a>
+                <a href="#" class="text-info edit-contact" data-id="${row.userID}" data-bs-toggle="modal" data-bs-target="#editContactModal">Edit</a>
+                <a href="#" class="text-danger delete-contact" data-id="${row.userID}" data-bs-toggle="modal" data-bs-target="#deleteContactModal">Delete</a>
               </div>`;
-          },
+          }
+
         },
+
       ],
-      selectedStock: null,
       loading: false,
     };
   },
+  mounted() {
+    $(document).on('click', '.delete-contact', (e) => {
+      e.preventDefault();
+      const contactId = $(e.currentTarget).data('id');
+      this.selectedUserID = contactId;
+
+      // Optional: open modal manually for safety
+      setTimeout(() => {
+        const modalEl = document.getElementById('deleteContactModal');
+        const modalInstance = Modal.getOrCreateInstance(modalEl);
+        modalInstance.show();
+      }, 100);
+    });
+
+    $(document).on('click', '.edit-contact', (e) => {
+      e.preventDefault();
+      const contactId = $(e.currentTarget).data('id');
+      // You can now find the contact details from DataTable's data
+      const rowData = this.$refs.table.dt
+        .rows()
+        .data()
+        .toArray()
+        .find((row) => row.userID === contactId);
+
+      
+    if (rowData) {
+      console.log("Selected userID:", contactId);
+
+      this.editContact(rowData);
+      // Trigger modal manually to avoid race condition
+      setTimeout(() => {
+        const modalEl = document.getElementById('editContactModal');
+        const modalInstance = Modal.getOrCreateInstance(modalEl);
+        modalInstance.show();
+      }, 200); // short delay to ensure reactivity kicks in
+    }else {
+        this.showToast("Contact not found", true);
+      }
+    });
+  },
+
   methods: {
     showToast(message, isError = false) {
       Toastify({
@@ -123,49 +177,104 @@ export default {
         backgroundColor: isError ? "#d9534f" : "#5cb85c",
       }).showToast();
     },
-    editStock(stock) {
-      this.selectedStock = { ...stock };
+    editContact(contact) {
+      this.selectedContact = { ...contact };
     },
-    async deleteStock(stockId) {
-      if (!stockId) {
-        this.showToast("Stock ID is missing", true);
-        return;
-      }
-      this.loading = true;
+    async confirmDelete() {
+      if (!this.selectedUserID) return;
+
       try {
         const res = await axios.post(
-          `${Const.BASE_URL}stock/delete`,
-          { id: stockId },
-          { headers: { "access-token": localStorage.getItem("accessToken") } }
+          `${Const.BASE_URL}users/deletePermanently`,
+          {
+            userId: this.selectedUserID,
+            feedback: "yes",
+          },
+          {
+            headers: {
+              "access-token": localStorage.getItem("accessToken"),
+            },
+          }
         );
+
         if (res.data.status === 200) {
-          this.showToast("Stock item deleted successfully");
-          $("#stockTable").DataTable().ajax.reload();
+          this.showToast("Contact deleted successfully");
+          this.$refs.table.dt.ajax.reload(null, false);
         } else {
-          this.showToast(res.data.message || "Failed to delete stock", true);
+          this.showToast(res.data.message || "Failed to delete contact", true);
         }
       } catch (error) {
-        console.error("Error deleting stock:", error);
-        this.showToast("Error deleting stock. Please try again.", true);
+        console.error("Delete error:", error);
+        this.showToast("An error occurred while deleting the contact.", true);
       } finally {
-        this.loading = false;
+        const modalEl = document.getElementById("deleteContactModal");
+        const modalInstance = Modal.getInstance(modalEl);
+        if (modalInstance) modalInstance.hide();
+        this.selectedUserID = null;
       }
     },
+    cancelDelete() {
+      const modalEl = document.getElementById("deleteContactModal");
+      const modalInstance = Modal.getInstance(modalEl);
+      if (modalInstance) modalInstance.hide();
+      this.selectedUserID = null;
+    },
+
+    handleUserAdded() {
+      console.log('User Contact added, closing modal and refreshing data...');
+
+      const modalEl = document.getElementById('newContactModal');
+      const modalInstance = Modal.getInstance(modalEl) || new Modal(modalEl);
+      modalInstance.hide();
+
+      // Ensure backdrop is cleaned after modal hides
+      modalEl.addEventListener('hidden.bs.modal', () => {
+        setTimeout(() => {
+          document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
+          document.body.classList.remove('modal-open');
+        }, 300);
+
+        // Refresh the DataTable
+        if (this.$refs.table && this.$refs.table.dt) {
+          this.$refs.table.dt.ajax.reload(null, false);
+        } else {
+          console.error('DataTable reference is missing.');
+        }
+      }, { once: true });
+    },
+    handleUserUpdate() {
+      const modalEl = document.getElementById('editContactModal');
+      const modalInstance = Modal.getInstance(modalEl) || new Modal(modalEl);
+      modalInstance.hide();
+
+      modalEl.addEventListener('hidden.bs.modal', () => {
+        setTimeout(() => {
+          document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
+          document.body.classList.remove('modal-open');
+        }, 300);
+
+        if (this.$refs.table && this.$refs.table.dt) {
+          this.$refs.table.dt.ajax.reload(null, false);
+        }
+      }, { once: true });
+    }
+
+  
   },
 };
 </script>
 
 <template>
-  <div>
+  <div class="container mt-4 mb-5">
     <div class="page-header d-print-none">
       <div class="container-xxl">
         <div class="row g-2 align-items-center">
           <div class="col">
-            <h2 class="page-title">Stock List</h2>
+            <h2 class="page-title">Available Contacts</h2>
           </div>
           <div class="col-auto ms-auto">
-            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addStockModal">
-              Add Stock
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#newContactModal">
+              New Contact
             </button>
           </div>
         </div>
@@ -174,45 +283,81 @@ export default {
 
     <div class="table-responsive">
       <DataTable
+        ref="table"
         id="stockTable"
         :columns="columns"
         :options="options"
         class="table card-table table-vcenter text-nowrap datatable"
-      ></DataTable>
+      />
+
     </div>
 
-    <!-- Add Stock Modal -->
+    <!-- Add Contact Modal -->
     <div
       class="modal modal-blur fade"
-      id="addStockModal"
+      id="newContactModal"
       tabindex="-1"
       aria-hidden="true"
     >
       <div class="modal-dialog modal-lg modal-dialog-centered">
-        <NewContactForm />
+        
+        <NewContactForm @contact-added="handleUserAdded" />
+
       </div>
     </div>
 
-    <!-- Edit Stock Modal -->
+    <!-- Edit Contact Modal -->
     <div
       class="modal modal-blur fade"
-      id="editStockModal"
+      id="editContactModal"
       tabindex="-1"
       aria-hidden="true"
     >
       <div class="modal-dialog modal-lg modal-dialog-centered">
-        <!-- You can create a similar EditStock component -->
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title">Edit Stock</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-          </div>
+          
           <div class="modal-body">
-            <!-- Edit Stock Form Goes Here -->
+          <EditContactForm
+            v-if="selectedContact"
+            :user="selectedContact"
+            @contact-updated="handleUserUpdate"
+          />
+
           </div>
-        </div>
+        
       </div>
     </div>
+
+<!-- Delete Contact Confirmation Modal -->
+<div
+  class="modal fade"
+  id="deleteContactModal"
+  tabindex="-1"
+  aria-labelledby="deleteContactModalLabel"
+  aria-hidden="true"
+>
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="deleteContactModalLabel">Confirm Delete</h5>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+        ></button>
+      </div>
+      <div class="modal-body">
+        Are you sure you want to delete this contact?
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" @click="cancelDelete">No</button>
+        <button type="button" class="btn btn-danger" @click="confirmDelete">Yes</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
   </div>
 </template>
 

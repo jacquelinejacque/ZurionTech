@@ -7,8 +7,8 @@ export default {
   data() {
     return {
       formData: {
-        username: 'johndoe@example.com',
-        password: 'password123'
+        username: 'joy@example.com',
+        password: 'JOY'
       },
       loading: false,
       formSubmitted: false,
@@ -42,7 +42,7 @@ export default {
         localStorage.setItem('accessToken', accessToken);
 
         // this.$router.push('dashboard/dashboard-view');
-        this.$router.push('/stockManager/dashboard/dashboard-view');
+        this.$router.push('/contactRegistry/contact/list-contact');
       } catch (error) {
         console.error(error);
         this.showToastMessage('Invalid Credentials');

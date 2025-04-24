@@ -4,14 +4,17 @@ import axios from "axios";
 import Toastify from "toastify-js";
 import { Toast } from "bootstrap/dist/js/bootstrap.bundle";
 
+
 export default {
   data() {
     return {
       routes: null,
       userType: null,
       formData: {
-        fullName: "",
-        phoneNumber: "",
+        name: "",
+        phone: "",
+        email :"",
+        password: "",
         idNumber : "",
         dateOfBirth: "",
         gender: "",
@@ -24,9 +27,8 @@ export default {
   },
 
   mounted() {
-    (this.toastElement = new Toast(document.getElementById("newUser-toast"))),
-      this.getRoutes();
-    this.getUserType();
+    (this.toastElement = new Toast(document.getElementById("newUser-toast")))
+    
   },
 
   methods: {
@@ -40,58 +42,32 @@ export default {
     },
     async handleSubmit() {
       try {
-        const selectedUserType = this.userType.find(
-          (user) => user.userTypeId === this.formData.userType
-        );
-
-        if (!selectedUserType) {
-          this.showToast("Invalid user type selected.", true);
-          return;
-        }
-
-        if (selectedUserType.requiresRoutes && this.formData.channels.length === 0) {
-          this.showToast(
-            "Please select a route before submitting for this user type.",
-            true
-          );
-          return;
-        }
-
-        // Ensure all fields are filled
-        if (!this.formData.name || !this.formData.phoneNumber || !this.formData.email) {
-          this.showToast("Please fill all required fields.", true);
-          return;
-        }
 
         this.loading = true;
-
-        // Transform channels if required
         const submitData = {
           ...this.formData,
-          channels: this.formData.channels.map((channel) => ({
-            channelId: channel,
-          })),
         };
 
         console.log("Submitting data:", submitData);
 
-        const res = await axios.post(`${Const.BASE_URL}stock/add`, submitData, {
+        const res = await axios.post(`${Const.BASE_URL}users/create`, submitData, {
           headers: { "access-token": localStorage.getItem("accessToken") },
         });
 
         if (res.data.status === 10001) {
-          this.showToast("StockItem successfully created", false);
-          setTimeout(() => {
-            window.location.reload();
-          }, 1000);
+          console.log(res.data);
+          this.showToast("User Contact successfully created", false);
+          this.$emit('contact-added');
+          this.resetForm();
+
         } else {
-          const message = res.data.message || "Failed to create stock Item";
+          const message = res.data.message || "Failed to create User Contact";
           this.showToast(message, true);
         }
       } catch (error) {
         console.error("Error:", error.response?.data || error.message);
         const message =
-          error.response?.data?.message || "Failed to create stockItem, please try again";
+          error.response?.data?.message || "Failed to create User Contact, please try again";
         this.showToast(message, true);
       } finally {
         this.loading = false;
@@ -102,11 +78,12 @@ export default {
     resetForm() {
       this.formData = {
         name: "",
-        category: "",
-        description : "",
-        quantity: "",
-        price: "",
-        status: "",
+        phone: "",
+        email : "",
+        idNumber: "",
+        dateOfBirth: "",
+        gender: "",
+        organisation : "",
       };
 
       this.formSubmitted = true;
@@ -120,7 +97,7 @@ export default {
     <form @submit.prevent="handleSubmit">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title">New Stock</h5>
+          <h5 class="modal-title">New Contact</h5>
           <button
             type="button"
             class="btn-close"
@@ -136,20 +113,41 @@ export default {
                 type="text"
                 class="form-control"
                 id="fullName"
-                v-model="formData.fullName"
+                v-model="formData.name"
                 required
               />
             </div>
             <div class="col-md-6 mb-3">
-              <label for="phoneNumber" class="form-label">Phone Number</label>
+              <label for="password" class="form-label">Password</label>
               <input
-                type="tel"
+                type="password"
                 class="form-control"
-                id="phoneNumber"
-                v-model="formData.phoneNumber"
+                id="password"
+                v-model="formData.password"
                 required
               />
             </div>
+
+            <div class="col-md-6 mb-3">
+              <label for="phone" class="form-label">Phone Number</label>
+              <input
+                type="tel"
+                class="form-control"
+                id="phone"
+                v-model="formData.phone"
+                required
+              />
+            </div>
+            <div class="col-md-6 mb-3">
+              <label for="email" class="form-label">Email</label>
+              <input
+                type="email"
+                class="form-control"
+                id="email"
+                v-model="formData.email"
+                required
+              />
+            </div>            
             <div class="col-md-6 mb-3">
               <label for="idNumber" class="form-label">Id Number</label>
               <input
@@ -162,26 +160,32 @@ export default {
             </div>
             <div class="col-md-6 mb-3">
               <label for="dateOfBirth" class="form-label">Date of Birth</label>
+             
               <input
-                type="text"
-                class="form-control"
-                id="dateOfBirth"
                 v-model="formData.dateOfBirth"
-                required
+                type="date"
+                id="invoice-date"
+                class="form-control"
               />
             </div>
             <div class="col-md-6 mb-3">
               <label for="gender" class="form-label">Gender</label>
-              <input
-                type=""
+              <select
                 class="form-control"
                 id="gender"
                 v-model="formData.gender"
                 required
-              />
+              >
+                <option disabled value="">Select Gender</option>
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+                <option value="Prefer Not Say">Prefer Not Say</option>
+              </select>
             </div>
+
+
             <div class="col-md-6 mb-3">
-              <label for="organisation" class="form-label">Organisatio</label>
+              <label for="organisation" class="form-label">Organisation</label>
               <input
                 type="organisation"
                 class="form-control"

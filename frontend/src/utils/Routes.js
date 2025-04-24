@@ -24,7 +24,7 @@ export const routes = [
     },
     children: [
       {
-        path: 'stock/list-contact', 
+        path: 'contact/list-contact', 
         name: 'ContactList',
         component: ContactList,
         meta: {
