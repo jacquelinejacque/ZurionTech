@@ -347,7 +347,7 @@ export default {
           ></button>
         </div>
         <div class="modal-dialog modal-lg modal-dialog-centered"></div>
-        <div class="modal-body">
+        <div class="modal-body text-danger">
           Are you sure you want to delete this contact?
         </div>
         <div class="modal-footer">
