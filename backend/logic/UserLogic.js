@@ -18,18 +18,19 @@ class UserLogic {
               if (Utils.isEmpty(body.name)) return done("Name cannot be empty");
               if (Utils.isEmpty(body.phone)) return done("Phone number is required");
               if (Utils.isEmpty(body.email)) return done("Email is required");
+              const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+              if (!emailRegex.test(body.email)) return done("Please enter a valid email address");
+
               if (Utils.isEmpty(body.password)) return done("Password is required");
               if (Utils.isEmpty(body.idNumber)) return done("Id Number is required");
               if (Utils.isEmpty(body.gender)) return done("Gender is required");
               if (Utils.isEmpty(body.organisation)) return done("Organisation is required");
               if (Utils.isEmpty(body.dateOfBirth)) return done("Date of birth is required");
 
-              // Ensure dateOfBirth is in the past
               const dob = new Date(body.dateOfBirth);
               const today = new Date();
               if (dob >= today.setHours(0, 0, 0, 0)) return done("Date of birth must be in the past");
                   
-              // Check if user already exists
               DatabaseManager.user
                 .findOne({ where: { email: body.email } })
                 .then((res) => {
@@ -40,7 +41,6 @@ class UserLogic {
             },
     
             function (done) {
-              // Utility functions for masking and hashing
               const maskName = (name) => {
                 const first = name.split(" ")[0];
                 return `${first} ***`;
@@ -54,7 +54,6 @@ class UserLogic {
                 return crypto.createHash("sha256").update(phone).digest("hex");
               };
     
-              // Prepare params to insert
               const params = {
                 name: body.name,
                 phone: body.phone,
@@ -65,7 +64,6 @@ class UserLogic {
                 organisation: body.organisation,
                 password: bcrypt.hashSync(body.password, 8),
     
-                // Masked + hashed values
                 maskedName: maskName(body.name),
                 maskedPhone: maskPhone(body.phone),
                 hashedPhone: hashPhone(body.phone),
@@ -288,6 +286,21 @@ class UserLogic {
         async.waterfall(
           [
             function (done) {
+              if (Utils.isEmpty(body.name)) return done("Name cannot be empty");
+              if (Utils.isEmpty(body.phone)) return done("Phone number is required");
+              if (Utils.isEmpty(body.email)) return done("Email is required");
+              const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+              if (!emailRegex.test(body.email)) return done("Please enter a valid email address");
+
+              if (Utils.isEmpty(body.idNumber)) return done("Id Number is required");
+              if (Utils.isEmpty(body.gender)) return done("Gender is required");
+              if (Utils.isEmpty(body.organisation)) return done("Organisation is required");
+              if (Utils.isEmpty(body.dateOfBirth)) return done("Date of birth is required");
+
+              const dob = new Date(body.dateOfBirth);
+              const today = new Date();
+              if (dob >= today.setHours(0, 0, 0, 0)) return done("Date of birth must be in the past");
+                            
               DatabaseManager.user
                 .findOne({
                   attributes: ["userID", "name", "phone", "email", "idNumber", "dateOfBirth", "gender", "organisation", "maskedName", "maskedPhone", "hashedPhone"],

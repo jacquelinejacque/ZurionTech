@@ -139,7 +139,7 @@ export default {
             <div class="col-md-6 mb-3">
               <label for="email" class="form-label">Email</label>
               <input
-                type="email"
+                type="text"
                 class="form-control"
                 id="email"
                 v-model="formData.email"

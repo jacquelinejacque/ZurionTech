@@ -84,7 +84,9 @@ export default {
           this.showToast(response.data.message || 'User Contact updated successfully', false)
           this.$emit('contact-updated');
         } else {
-          this.showToast(response.data.message || 'Failed to update user', true)
+          const message =
+            response.data.error || response.data.message || "Failed to Update User Contact";
+          this.showToast(message, true);
         }
       } catch (error) {
         console.error('Error updating user:', error)
@@ -129,7 +131,7 @@ export default {
 
             <div class="col-md-6 mb-3">
               <label for="email" class="form-label">Email</label>
-              <input type="email" id="email" v-model="formData.email" class="form-control" />
+              <input type="text" id="email" v-model="formData.email" class="form-control" />
             </div>
 
             <div class="col-md-6 mb-3">
