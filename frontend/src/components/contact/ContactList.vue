@@ -201,7 +201,21 @@ export default {
 
         if (res.data.status === 200) {
           this.showToast("Contact deleted successfully");
-          this.$refs.table.dt.ajax.reload(null, false);
+          const modal = document.getElementById('deleteContactModal');
+          if (modal) {
+            const modalInstance = Modal.getInstance(modal) || new Modal(modal);
+            modalInstance.hide();
+
+            modal.addEventListener(
+              'hidden.bs.modal',
+              () => {
+                document.querySelectorAll('.modal-backdrop').forEach((el) => el.remove());
+                document.body.classList.remove('modal-open'); 
+              },
+              { once: true }
+            );
+          }
+          this.$refs.table.dt.ajax.reload(null, false);  
         } else {
           this.showToast(res.data.message || "Failed to delete contact", true);
         }

@@ -54,7 +54,7 @@ export default {
           headers: { "access-token": localStorage.getItem("accessToken") },
         });
 
-        if (res.data.status === 10001) {
+        if (res.data.status === 200) {
           console.log(res.data);
           this.showToast("User Contact successfully created", false);
           this.$emit('contact-added');

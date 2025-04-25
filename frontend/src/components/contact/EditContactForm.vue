@@ -80,7 +80,7 @@ export default {
           }
         })
         console.log('API Response:', response)
-        if (response.data.status === 10001) {
+        if (response.data.status ===200) {
           this.showToast(response.data.message || 'User Contact updated successfully', false)
           this.$emit('contact-updated');
         } else {
