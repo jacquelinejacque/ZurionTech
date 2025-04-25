@@ -8,6 +8,7 @@ import NewContactForm from "./NewContactForm.vue";
 import EditContactForm from "./EditContactForm.vue";
 import { Const } from "../../utils/constants";
 import { Modal } from 'bootstrap'
+import moment from 'moment'
 import 'bootstrap/dist/js/bootstrap.bundle.min.js'
 DataTable.use(DataTableBs5);
 
@@ -94,7 +95,7 @@ export default {
           title: 'DateOfBirth',
           data: null,
           render: (data, type, row) => {
-            return `${row.dateOfBirth}`
+            return row.dateOfBirth ? moment(row.dateOfBirth).format('MM/DD/YYYY') : '-'
           }
         },
         {
@@ -168,6 +169,9 @@ export default {
   },
 
   methods: {
+    formatDateTime(dateTime) {
+      return moment(dateTime).format('YYYY-MM-DD')
+    },    
     showToast(message, isError = false) {
       Toastify({
         text: message,
@@ -331,7 +335,7 @@ export default {
     aria-labelledby="deleteContactModalLabel"
     aria-hidden="true"
   >
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
       <div class="modal-content">
         <div class="modal-header">
           <h5 class="modal-title" id="deleteContactModalLabel">Confirm Delete</h5>
@@ -342,12 +346,13 @@ export default {
             aria-label="Close"
           ></button>
         </div>
+        <div class="modal-dialog modal-lg modal-dialog-centered"></div>
         <div class="modal-body">
           Are you sure you want to delete this contact?
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" @click="cancelDelete">No</button>
-          <button type="button" class="btn btn-danger" @click="confirmDelete">Yes</button>
+          <button type="button" class="btn btn-secondary me-auto" @click="cancelDelete">No</button>
+          <button type="button" class="btn btn-primary" @click="confirmDelete">Yes</button>
         </div>
       </div>
     </div>

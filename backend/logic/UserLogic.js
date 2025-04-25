@@ -20,10 +20,15 @@ class UserLogic {
               if (Utils.isEmpty(body.email)) return done("Email is required");
               if (Utils.isEmpty(body.password)) return done("Password is required");
               if (Utils.isEmpty(body.idNumber)) return done("Id Number is required");
-              if (Utils.isEmpty(body.dateOfBirth)) return done("Date of birth is required");
               if (Utils.isEmpty(body.gender)) return done("Gender is required");
               if (Utils.isEmpty(body.organisation)) return done("Organisation is required");
-    
+              if (Utils.isEmpty(body.dateOfBirth)) return done("Date of birth is required");
+
+              // Ensure dateOfBirth is in the past
+              const dob = new Date(body.dateOfBirth);
+              const today = new Date();
+              if (dob >= today.setHours(0, 0, 0, 0)) return done("Date of birth must be in the past");
+                  
               // Check if user already exists
               DatabaseManager.user
                 .findOne({ where: { email: body.email } })

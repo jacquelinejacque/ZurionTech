@@ -40,10 +40,10 @@ export default {
         },
       }).showToast();
     },
-    async handleSubmit() {
+    async handleSubmit() { 
       try {
-
         this.loading = true;
+
         const submitData = {
           ...this.formData,
         };
@@ -59,21 +59,22 @@ export default {
           this.showToast("User Contact successfully created", false);
           this.$emit('contact-added');
           this.resetForm();
-
         } else {
-          const message = res.data.message || "Failed to create User Contact";
+          const message =
+            res.data.error || res.data.message || "Failed to create User Contact";
           this.showToast(message, true);
         }
       } catch (error) {
         console.error("Error:", error.response?.data || error.message);
         const message =
-          error.response?.data?.message || "Failed to create User Contact, please try again";
+          error.response?.data?.error ||
+          error.response?.data?.message ||
+          "Failed to create User Contact, please try again";
         this.showToast(message, true);
       } finally {
         this.loading = false;
       }
     },
-
 
     resetForm() {
       this.formData = {
@@ -114,7 +115,6 @@ export default {
                 class="form-control"
                 id="fullName"
                 v-model="formData.name"
-                required
               />
             </div>
             <div class="col-md-6 mb-3">
@@ -124,7 +124,6 @@ export default {
                 class="form-control"
                 id="password"
                 v-model="formData.password"
-                required
               />
             </div>
 
@@ -135,7 +134,6 @@ export default {
                 class="form-control"
                 id="phone"
                 v-model="formData.phone"
-                required
               />
             </div>
             <div class="col-md-6 mb-3">
@@ -145,7 +143,6 @@ export default {
                 class="form-control"
                 id="email"
                 v-model="formData.email"
-                required
               />
             </div>            
             <div class="col-md-6 mb-3">
@@ -155,7 +152,6 @@ export default {
                 class="form-control"
                 id="idNumber"
                 v-model="formData.idNumber"
-                required
               />
             </div>
             <div class="col-md-6 mb-3">
@@ -174,7 +170,6 @@ export default {
                 class="form-control"
                 id="gender"
                 v-model="formData.gender"
-                required
               >
                 <option disabled value="">Select Gender</option>
                 <option value="Male">Male</option>
@@ -191,7 +186,6 @@ export default {
                 class="form-control"
                 id="organisation"
                 v-model="formData.organisation"
-                required
               />
             </div>
 
